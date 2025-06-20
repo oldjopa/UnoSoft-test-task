@@ -1,4 +1,3 @@
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -40,11 +39,11 @@ public class Main {
                 .toList();
         try {
             long endTime = System.currentTimeMillis();
-            System.out.println("Execution time: " + (endTime - startTime) + " ms");
+            System.out.println("Время выполнения: " + (endTime - startTime) + " ms");
             System.out.println("Всего групп с более чем 1 элементом: " + result.size());
             Writer.writeResultToFile("output.txt", result);
         }catch (IOException e) {
-            System.err.println("Error processing file: " + e.getMessage());
+            System.err.println("Ошибка записи в файл: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
