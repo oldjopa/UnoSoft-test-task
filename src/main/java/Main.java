@@ -1,3 +1,5 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -29,9 +31,7 @@ public class Main {
         }
         long startTime = System.currentTimeMillis();
         String filePath = args[0];
-        FileParser fileParser = new FileParser();
-        List<List<String>> parsedFile = fileParser.parseFile(filePath);
-        List<Group> result = parseGroups(parsedFile);
+        List<Group> result = parseAndGroup(filePath);
 
         result = result.stream()
                 .filter(k -> k.getLines().size() > 1)
@@ -49,32 +49,72 @@ public class Main {
         }
     }
 
-    public static List<Group> parseGroups(List<List<String>> parsedFile) {
-        int n = parsedFile.size();
-        DSU dsu = new DSU(n);
+    public static List<Group> parseAndGroup(String filename) {
+        int lineCount = 0;
+
+        // 1. Подсчет строк
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            while (reader.readLine() != null) {
+                lineCount++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+
+        DSU dsu = new DSU(lineCount);
         Map<Unit, Integer> unitToLine = new HashMap<>();
 
-        for (int lineIndex = 0; lineIndex < n; lineIndex++) {
-            List<String> line = parsedFile.get(lineIndex);
-            for (int colIndex = 0; colIndex < line.size(); colIndex++) {
-                String value = line.get(colIndex);
-                if (value == null) continue;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            int lineIndex = 0;
 
-                Unit unit = new Unit(colIndex, value);
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                String[] values = line.split(";");
 
-                if (unitToLine.containsKey(unit)) {
-                    int otherIndex = unitToLine.get(unit);
-                    dsu.union(lineIndex, otherIndex);
-                } else {
-                    unitToLine.put(unit, lineIndex);
+                for (int colIndex = 0; colIndex < values.length; colIndex++) {
+                    String value = values[colIndex].replaceAll("\"", "");
+                    if (value.isEmpty()) continue;
+
+                    Unit unit = new Unit(colIndex, value);
+                    if (unitToLine.containsKey(unit)) {
+                        dsu.union(lineIndex, unitToLine.get(unit));
+                    } else {
+                        unitToLine.put(unit, lineIndex);
+                    }
                 }
+
+                lineIndex++;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
 
         Map<Integer, Group> groups = new HashMap<>();
-        for (int i = 0; i < n; i++) {
-            int root = dsu.find(i);
-            groups.computeIfAbsent(root, k -> new Group()).addLine(parsedFile.get(i));
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            int lineIndex = 0;
+
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                String[] values = line.split(";");
+                List<String> cleaned = new ArrayList<>();
+
+                for (String value : values) {
+                    value = value.replaceAll("\"", "");
+                    cleaned.add(value.isEmpty() ? null : value);
+                }
+
+                int root = dsu.find(lineIndex);
+                groups.computeIfAbsent(root, k -> new Group()).addLine(cleaned);
+                lineIndex++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
 
         return new ArrayList<>(groups.values());
