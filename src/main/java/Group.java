@@ -4,8 +4,8 @@ import java.util.*;
 
 @Getter
 public class Group {
-    private final Set<List<Long>> lines = new HashSet<>();
-    public void addLine(List<Long> line) {
+    private final Set<List<String>> lines = new HashSet<>();
+    public void addLine(List<String> line) {
         lines.add(line);
     }
 }

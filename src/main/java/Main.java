@@ -30,7 +30,7 @@ public class Main {
         long startTime = System.currentTimeMillis();
         String filePath = args[0];
         FileParser fileParser = new FileParser();
-        List<List<Long>> parsedFile = fileParser.parseFile(filePath);
+        List<List<String>> parsedFile = fileParser.parseFile(filePath);
         List<Group> result = parseGroups(parsedFile);
 
         result = result.stream()
@@ -42,22 +42,22 @@ public class Main {
             System.out.println("Время выполнения: " + (endTime - startTime) + " ms");
             System.out.println("Всего групп с более чем 1 элементом: " + result.size());
             Writer.writeResultToFile("output.txt", result);
-        }catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Ошибка записи в файл: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    public static List<Group> parseGroups(List<List<Long>> parsedFile) {
+    public static List<Group> parseGroups(List<List<String>> parsedFile) {
         int n = parsedFile.size();
         DSU dsu = new DSU(n);
         Map<Unit, Integer> unitToLine = new HashMap<>();
 
         for (int lineIndex = 0; lineIndex < n; lineIndex++) {
-            List<Long> line = parsedFile.get(lineIndex);
+            List<String> line = parsedFile.get(lineIndex);
             for (int colIndex = 0; colIndex < line.size(); colIndex++) {
-                Long value = line.get(colIndex);
+                String value = line.get(colIndex);
                 if (value == null) continue;
 
                 Unit unit = new Unit(colIndex, value);

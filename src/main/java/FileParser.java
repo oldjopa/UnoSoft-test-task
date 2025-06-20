@@ -1,29 +1,24 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 public class FileParser {
-    public List<List<Long>> parseFile(String filename){
-        List<List<Long>> res = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filename))))) {
+    public List<List<String>> parseFile(String filename) {
+        List<List<String>> res = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 String[] values = line.split(";");
-                List<Long> cleaned = new ArrayList<>();
+                List<String> cleaned = new ArrayList<>();
 
                 for (String value : values) {
                     value = value.replaceAll("\"", "");
                     if (value.isEmpty()) {
                         cleaned.add(null);
                     } else {
-                        try {
-                            cleaned.add(Long.parseLong(value));
-                        } catch (NumberFormatException e) {
-                            cleaned.clear();
-                            break;
-                        }
+                        cleaned.add(value);
                     }
                 }
                 if (!cleaned.isEmpty()) {
